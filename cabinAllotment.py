@@ -17,25 +17,54 @@ class CabinAllotment:
         """
         self.input_file = input_file
         self.output_file = output_file
-        self.first_set_ID = []
-        self.second_set_ID = []
-        self.third_set_ID = []
-        self.fourth_set_ID = []
+        self.bookingIds = []
+
+    def process_booking_ids(self, ids_str):
+        """
+        Processes a string of comma-separated booking IDs, ensuring they are unique positive integers.
+
+        :param ids_str: A string of comma-separated booking IDs.
+        :return: A list of unique, positive integer booking IDs.
+        """
+        booking_ids = []
+        try:
+            for id_str in ids_str.split(","):
+                id_int = int(id_str.strip())
+                if id_int <= 0:
+                    raise ValueError("ID must be a positive integer.")
+                if id_int not in booking_ids:
+                    booking_ids.append(id_int)
+        except ValueError as e:
+            print(f"Error: {e}")
+            return []
+        return booking_ids
 
     def read_input(self):
         """
-        Reads booking IDs from the input file and stores them in a list.
+        Reads booking IDs from the input file and returns an array of unique IDs.
         """
         try:
             with open(self.input_file, "r") as f:
-                self.first_set_ID = list(map(int, f.readline().strip().split(",")))
-                self.second_set_ID = list(map(int, f.readline().strip().split(",")))
-                self.third_set_ID = list(map(int, f.readline().strip().split(",")))
-                self.fourth_set_ID = list(map(int, f.readline().strip().split(",")))
-
-                print("Booking IDs --> ", self.first_set_ID)
+                content = f.read().strip()
+                if not content:
+                    raise ValueError("The input file is empty.")
+                return self.process_booking_ids(content)
         except FileNotFoundError:
             print(f"Error: File '{self.input_file}' not found.")
+            return []
+        except ValueError as e:
+            print(f"Error: {e}")
+            return []
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
+            return []
+
+    def get_booking_ids(self):
+        """
+        Takes user input as a comma-separated string of booking IDs.
+        """
+        input_str = input("Enter booking IDs, separated by commas: ")
+        return self.process_booking_ids(input_str)
 
     def calculate_median(self, sorted_ids):
         """
@@ -52,61 +81,12 @@ class CabinAllotment:
             # In case of even length, pick either middle element
             return sorted_ids[n // 2]
 
-    def categorize_rooms(self, sorted_ids):
-        """
-        Categorizes booking IDs into suite and balcony rooms based on the median.
-
-        :param sorted_ids: A list of sorted booking IDs.
-        """
-        # First Sorted List
-        sorted_booking_ids = self.heap_sort(self.first_set_ID)
-        median = self.calculate_median(sorted_booking_ids)
-        # Categorize rooms on First set of IDs
-        suite_ids = sorted_booking_ids[: sorted_booking_ids.index(median) + 1]
-        balcony_ids = sorted_booking_ids[sorted_booking_ids.index(median) + 1 :]
-
-        # Merge Second set of IDs with First set after Median IDs
-        balcony_ids.extend(self.second_set_ID)
-        id_list2 = self.heap_sort(balcony_ids)
-        print("id_list2-> ", id_list2)
-        median = self.calculate_median(id_list2)
-        print("median ->", median)
-        # Categorize rooms on Second set of IDs
-        balcony_ids = id_list2[: id_list2.index(median) + 1]
-        Outside_rooms_ids = id_list2[id_list2.index(median) + 1 :]
-
-        # Merge Third set of IDs with Second set after Median IDs
-        Outside_rooms_ids.extend(self.third_set_ID)
-        id_list3 = self.heap_sort(Outside_rooms_ids)
-        median = self.calculate_median(id_list3)
-        # Categorize rooms on Third set of IDs
-        Outside_rooms_ids = id_list3[: id_list3.index(median) + 1]
-        Ocean_view_ids = id_list3[id_list3.index(median) + 1 :]
-
-        # Merge Fourth set of IDs with Third set after Median IDs
-        Ocean_view_ids.extend(self.fourth_set_ID)
-        id_list4 = self.heap_sort(Ocean_view_ids)
-        median = self.calculate_median(id_list4)
-        # Categorize rooms on Fourth set of IDs
-        Ocean_view_ids = id_list4[: id_list4.index(median) + 1]
-        Interior_ids = id_list4[id_list4.index(median) + 1 :]
-
-        # Output to file
-        with open(self.output_file, "w") as f:
-            # Write output to file
-            f.write(f"Suite rooms were allocated to Ids:  {suite_ids}\n")
-            f.write(f"Outside rooms were allocated to Ids:  {Outside_rooms_ids}\n")
-            f.write(f"Ocean view rooms were allocated to Ids:  {Ocean_view_ids}\n")
-
-    def execute(self):
-        """
-        Executes the main logic of reading input, sorting, and categorizing booking IDs.
-        """
-        self.read_input()
-        if self.first_set_ID:
-            sorted_booking_ids = self.heap_sort(self.first_set_ID)
-            print("HeapSort --> ", sorted_booking_ids)
-            self.categorize_rooms(self.first_set_ID)
+    def split_at_median(self):
+        median = self.calculate_median(self.bookingIds)
+        median_index = self.bookingIds.index(median)
+        up_to_median = self.bookingIds[: median_index + 1]
+        self.bookingIds = self.bookingIds[median_index + 1 :]
+        return up_to_median
 
     def heapify(self, arr, length, parentIdx):
         largest = parentIdx
@@ -123,14 +103,15 @@ class CabinAllotment:
             self.swap(arr, parentIdx, largest)
             self.heapify(arr, length, largest)
 
-    def heap_sort(self, bookingIds):
+    def heap_sort(
+        self,
+    ):
         """
         Sorts the booking IDs using heap sort algorithm and returns the sorted list.
 
         :return: A list of sorted booking IDs.
         """
-        # arr = self.first_set_ID
-        arr = bookingIds
+        arr = self.bookingIds
         length = len(arr)
         last_parent_idx = length // 2 - 1
         last_child_idx = length - 1
@@ -157,9 +138,40 @@ class CabinAllotment:
         """
         arr[i], arr[j] = arr[j], arr[i]
 
+    def categorize_rooms(self):
+        """
+        Categorizes booking IDs into suite, balcony, outside rooms, ocean view, and interior rooms based on the median.
+        """
+        room_categories = ["Suite", "Balcony", "Outside", "Ocean view", "Interior"]
+        room_allocations = {}
+
+        for category in room_categories:
+            try:
+                if category == "Suite":
+                    self.bookingIds.extend(self.read_input())
+                else:
+                    self.bookingIds.extend(self.get_booking_ids())
+                self.heap_sort()
+                room_allocations[category] = self.split_at_median()
+            except Exception as e:
+                print(f"An error occurred while processing {category} rooms: {e}")
+                return
+
+        # Output to file
+        try:
+            with open(self.output_file, "w") as f:
+                for category, ids in room_allocations.items():
+                    if category in ["Suite", "Outside", "Ocean view"]:
+                        ids_str = ", ".join(
+                            map(str, ids)
+                        )  # Convert ids to strings and join with commas
+                        f.write(f"{category} rooms were allocated to Ids: {ids_str}\n")
+        except Exception as e:
+            print(f"An error occurred while writing to file: {e}")
+
 
 if __name__ == "__main__":
     INPUT_FILE = "inputPS05.txt"
     OUTPUT_FILE = "outputPS05.txt"
     cabin_allotment = CabinAllotment(INPUT_FILE, OUTPUT_FILE)
-    cabin_allotment.execute()
+    cabin_allotment.categorize_rooms()
