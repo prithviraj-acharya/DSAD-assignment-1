@@ -17,7 +17,10 @@ class CabinAllotment:
         """
         self.input_file = input_file
         self.output_file = output_file
-        self.booking_ids = []
+        self.first_set_ID = []
+        self.second_set_ID = []
+        self.third_set_ID = []
+        self.fourth_set_ID = []
 
     def read_input(self):
         """
@@ -25,8 +28,12 @@ class CabinAllotment:
         """
         try:
             with open(self.input_file, "r") as f:
-                self.booking_ids = list(map(int, f.read().strip().split(",")))
-                print("Booking IDs --> ", self.booking_ids)
+                self.first_set_ID = list(map(int, f.readline().strip().split(",")))
+                self.second_set_ID = list(map(int, f.readline().strip().split(",")))
+                self.third_set_ID = list(map(int, f.readline().strip().split(",")))
+                self.fourth_set_ID = list(map(int, f.readline().strip().split(",")))
+
+                print("Booking IDs --> ", self.first_set_ID)
         except FileNotFoundError:
             print(f"Error: File '{self.input_file}' not found.")
 
@@ -37,11 +44,13 @@ class CabinAllotment:
         :param sorted_ids: A list of sorted booking IDs.
         :return: The median value.
         """
+
         n = len(sorted_ids)
         if n % 2 == 1:
             return sorted_ids[n // 2]
         else:
-            return (sorted_ids[n // 2 - 1] + sorted_ids[n // 2]) / 2
+            # In case of even length, pick either middle element
+            return sorted_ids[n // 2]
 
     def categorize_rooms(self, sorted_ids):
         """
@@ -49,26 +58,55 @@ class CabinAllotment:
 
         :param sorted_ids: A list of sorted booking IDs.
         """
-        median = self.calculate_median(sorted_ids)
-        suite_ids = [id for id in sorted_ids if id <= median]
-        balcony_ids = [id for id in sorted_ids if id > median]
+        # First Sorted List
+        sorted_booking_ids = self.heap_sort(self.first_set_ID)
+        median = self.calculate_median(sorted_booking_ids)
+        # Categorize rooms on First set of IDs
+        suite_ids = sorted_booking_ids[: sorted_booking_ids.index(median) + 1]
+        balcony_ids = sorted_booking_ids[sorted_booking_ids.index(median) + 1 :]
 
-        print("Suite Rooms --> ", suite_ids)
-        print("Balcony Rooms --> ", balcony_ids)
+        # Merge Second set of IDs with First set after Median IDs
+        balcony_ids.extend(self.second_set_ID)
+        id_list2 = self.heap_sort(balcony_ids)
+        print("id_list2-> ", id_list2)
+        median = self.calculate_median(id_list2)
+        print("median ->", median)
+        # Categorize rooms on Second set of IDs
+        balcony_ids = id_list2[: id_list2.index(median) + 1]
+        Outside_rooms_ids = id_list2[id_list2.index(median) + 1 :]
 
+        # Merge Third set of IDs with Second set after Median IDs
+        Outside_rooms_ids.extend(self.third_set_ID)
+        id_list3 = self.heap_sort(Outside_rooms_ids)
+        median = self.calculate_median(id_list3)
+        # Categorize rooms on Third set of IDs
+        Outside_rooms_ids = id_list3[: id_list3.index(median) + 1]
+        Ocean_view_ids = id_list3[id_list3.index(median) + 1 :]
+
+        # Merge Fourth set of IDs with Third set after Median IDs
+        Ocean_view_ids.extend(self.fourth_set_ID)
+        id_list4 = self.heap_sort(Ocean_view_ids)
+        median = self.calculate_median(id_list4)
+        # Categorize rooms on Fourth set of IDs
+        Ocean_view_ids = id_list4[: id_list4.index(median) + 1]
+        Interior_ids = id_list4[id_list4.index(median) + 1 :]
+
+        # Output to file
         with open(self.output_file, "w") as f:
-            f.write(f"Suite Rooms :  {suite_ids}\n")
-            f.write(f"Balcony Rooms :  {balcony_ids}\n")
+            # Write output to file
+            f.write(f"Suite rooms were allocated to Ids:  {suite_ids}\n")
+            f.write(f"Outside rooms were allocated to Ids:  {Outside_rooms_ids}\n")
+            f.write(f"Ocean view rooms were allocated to Ids:  {Ocean_view_ids}\n")
 
     def execute(self):
         """
         Executes the main logic of reading input, sorting, and categorizing booking IDs.
         """
         self.read_input()
-        if self.booking_ids:
-            sorted_booking_ids = self.heap_sort()
+        if self.first_set_ID:
+            sorted_booking_ids = self.heap_sort(self.first_set_ID)
             print("HeapSort --> ", sorted_booking_ids)
-            self.categorize_rooms(sorted_booking_ids)
+            self.categorize_rooms(self.first_set_ID)
 
     def heapify(self, arr, length, parentIdx):
         largest = parentIdx
@@ -85,17 +123,19 @@ class CabinAllotment:
             self.swap(arr, parentIdx, largest)
             self.heapify(arr, length, largest)
 
-    def heap_sort(self):
+    def heap_sort(self, bookingIds):
         """
         Sorts the booking IDs using heap sort algorithm and returns the sorted list.
 
         :return: A list of sorted booking IDs.
         """
-        arr = self.booking_ids
+        # arr = self.first_set_ID
+        arr = bookingIds
         length = len(arr)
         last_parent_idx = length // 2 - 1
         last_child_idx = length - 1
 
+        # Creating a heap from the given array
         while last_parent_idx >= 0:
             self.heapify(arr, length, last_parent_idx)
             last_parent_idx = last_parent_idx - 1
