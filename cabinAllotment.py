@@ -1,10 +1,12 @@
-import heapq
+"""
+A class to manage cabin allotment based on booking IDs.
+
+Author: Group 13
+Year: 2024
+"""
 
 
 class CabinAllotment:
-    """
-    A class to manage cabin allotment based on booking IDs.
-    """
 
     def __init__(self, input_file, output_file):
         """
@@ -73,15 +75,15 @@ class CabinAllotment:
         left = 2 * parentIdx + 1
         right = left + 1
 
-        if left < length & arr[left] > arr[largest]:
+        if left < length and arr[left] > arr[largest]:
             largest = left
 
-        if right < length & arr[right] > arr[largest]:
+        if right < length and arr[right] > arr[largest]:
             largest = right
 
         if largest != parentIdx:
             self.swap(arr, parentIdx, largest)
-            self.heapify(arr, largest)
+            self.heapify(arr, length, largest)
 
     def heap_sort(self):
         """
@@ -89,7 +91,7 @@ class CabinAllotment:
 
         :return: A list of sorted booking IDs.
         """
-        arr = self.booking_ids.copy()
+        arr = self.booking_ids
         length = len(arr)
         last_parent_idx = length // 2 - 1
         last_child_idx = length - 1
@@ -104,23 +106,16 @@ class CabinAllotment:
             last_child_idx = last_child_idx - 1
 
         return arr
-        # heapq.heapify(arr)
-        # sorted_arr = []
-        # while arr:
-        #     sorted_arr.append(heapq.heappop(arr))
-        # return sorted_arr
 
     def swap(self, arr, i, j):
         """
-        Swaps two elements in an array or list.
+        Swaps two elements in an array or list using tuple unpacking for a more Pythonic approach.
 
         :param arr: The array or list where the swap operation will be performed.
         :param i: The index of the first element to be swapped.
         :param j: The index of the second element to be swapped.
         """
-        temp = arr[i]
-        arr[i] = arr[j]
-        arr[j] = temp
+        arr[i], arr[j] = arr[j], arr[i]
 
 
 if __name__ == "__main__":
