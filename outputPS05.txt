@@ -1,2 +1,3 @@
-Suite Rooms :  [13, 23, 67, 79, 89, 92, 167]
-Balcony Rooms :  [333, 345, 451, 520, 788, 890]
+Suite rooms were allocated to Ids:  [13, 23, 67, 79, 89, 92, 167]
+Outside rooms were allocated to Ids:  [15, 45, 75, 99, 200, 520]
+Ocean view rooms were allocated to Ids:  [111, 222, 444, 555, 666, 673]
