@@ -5,6 +5,8 @@ Author: Group 13
 Year: 2024
 """
 
+import sys
+
 
 class CabinAllotment:
 
@@ -35,8 +37,8 @@ class CabinAllotment:
                 if id_int not in booking_ids:
                     booking_ids.append(id_int)
         except ValueError as e:
-            print(f"Error: {e}")
-            return []
+            print(f"Error: ID must be a positive integer.")
+            sys.exit(1)
         return booking_ids
 
     def read_input(self):
@@ -51,13 +53,13 @@ class CabinAllotment:
                 return self.process_booking_ids(content)
         except FileNotFoundError:
             print(f"Error: File '{self.input_file}' not found.")
-            return []
+            sys.exit(1)
         except ValueError as e:
             print(f"Error: {e}")
-            return []
+            sys.exit(1)
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
-            return []
+            sys.exit(1)
 
     def get_booking_ids(self):
         """
