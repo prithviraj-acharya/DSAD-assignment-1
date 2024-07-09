@@ -126,8 +126,6 @@ class CabinAllotment:
             self.heapify(arr, last_child_idx, 0)
             last_child_idx = last_child_idx - 1
 
-        return arr
-
     def swap(self, arr, i, j):
         """
         Swaps two elements in an array or list using tuple unpacking for a more Pythonic approach.
