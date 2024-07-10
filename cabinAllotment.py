@@ -84,6 +84,16 @@ class CabinAllotment:
             return sorted_ids[n // 2]
 
     def split_at_median(self):
+        """
+        Splits the booking IDs at the median value.
+
+        This method calculates the median of the booking IDs, then splits the list of booking IDs into two parts:
+        one part containing IDs up to and including the median, and the other part containing the remaining IDs.
+        The original list of booking IDs is updated to only contain the IDs after the median.
+
+        Returns:
+            list: The list of booking IDs up to and including the median.
+        """
         median = self.calculate_median(self.bookingIds)
         median_index = self.bookingIds.index(median)
         up_to_median = self.bookingIds[: median_index + 1]
@@ -91,6 +101,19 @@ class CabinAllotment:
         return up_to_median
 
     def heapify(self, arr, length, parentIdx):
+        """
+        Ensures the subtree rooted at parentIdx in the array 'arr' satisfies the heap property.
+
+        This function compares the parent node with its left and right children and swaps the parent with the larger of the two children if the parent is not the largest. It recursively ensures that the subtree rooted at the index where the swap occurred satisfies the heap property.
+
+        Parameters:
+            arr (list): The list representation of the heap.
+            length (int): The number of elements in the heap that need to be heapified.
+            parentIdx (int): The index of the parent node in the array that might violate the heap property.
+
+        Returns:
+            None: The function modifies the array in place to ensure it satisfies the heap property.
+        """
         largest = parentIdx
         left = 2 * parentIdx + 1
         right = left + 1
